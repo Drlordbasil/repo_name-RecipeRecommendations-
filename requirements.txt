@@ -1,0 +1,23 @@
+The package requirements for this Python program are:
+
+- requests
+- bs4 (BeautifulSoup)
+- pandas
+- nltk
+- sklearn
+
+You can install these packages using pip:
+
+```
+pip install requests bs4 pandas nltk sklearn
+```
+
+Additionally, you will need to download NLTK data for sentiment analysis:
+
+```python
+import nltk
+nltk.download("stopwords")
+nltk.download("vader_lexicon")
+```
+
+Make sure to run these lines of code before running the program.
