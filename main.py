@@ -44,7 +44,8 @@ class RecipeRecommendationSystem:
         self.generate_recommendations()
 
     def load_recipes(self):
-        url = "https://www.allrecipes.com" # Replace with desired website containing recipes
+        # Replace with desired website containing recipes
+        url = "https://www.allrecipes.com"
         response = requests.get(url)
         soup = BeautifulSoup(response.content, "html.parser")
         recipe_elements = soup.find_all("div", class_="card__detailsContainer")
@@ -55,12 +56,15 @@ class RecipeRecommendationSystem:
                 ingredient.text.strip()
                 for ingredient in element.find_all("span", itemprop="recipeIngredient")
             ]
-            preparation_steps = element.find("div", class_="directions-section").text.strip().split("\n")
-            rating = element.find("span", class_="review-star-text").text.strip()
+            preparation_steps = element.find(
+                "div", class_="directions-section").text.strip().split("\n")
+            rating = element.find(
+                "span", class_="review-star-text").text.strip()
             comments = element.find_all("div", class_="review-comment")
             reviews = [comment.text.strip() for comment in comments]
 
-            recipe = Recipe(title, ingredients, preparation_steps, rating, reviews)
+            recipe = Recipe(title, ingredients,
+                            preparation_steps, rating, reviews)
             self.recipes.append(recipe)
 
     def load_users(self):
@@ -96,8 +100,10 @@ class RecipeRecommendationSystem:
                 reviews.extend(recipe.reviews)
 
             cleaned_reviews = [self.clean_text(review) for review in reviews]
-            without_stop_words = [self.remove_stop_words(review, stop_words) for review in cleaned_reviews]
-            sentiment_scores = [self.sentiment_analysis(review) for review in without_stop_words]
+            without_stop_words = [self.remove_stop_words(
+                review, stop_words) for review in cleaned_reviews]
+            sentiment_scores = [self.sentiment_analysis(
+                review) for review in without_stop_words]
             sentiment_scores = [score for score, _ in sentiment_scores]
 
             user_profile["reviews"] = sentiment_scores
@@ -131,20 +137,24 @@ class RecipeRecommendationSystem:
         scaled_similarity_matrix = scaler.fit_transform(similarity_matrix)
 
         n_clusters = len(self.users)
-        kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(scaled_similarity_matrix)
+        kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(
+            scaled_similarity_matrix)
 
         pca = PCA(n_components=2)
         principal_components = pca.fit_transform(scaled_similarity_matrix)
-        principal_df = pd.DataFrame(data=principal_components, columns=["PC1", "PC2"])
+        principal_df = pd.DataFrame(
+            data=principal_components, columns=["PC1", "PC2"])
         principal_df["User"] = kmeans.labels_
 
-        user_profiles_df = pd.DataFrame.from_dict(user_profiles, orient="index")
+        user_profiles_df = pd.DataFrame.from_dict(
+            user_profiles, orient="index")
         combined_df = pd.concat([principal_df, user_profiles_df], axis=1)
 
         recommendations = []
 
         for user in self.users:
-            user_cluster = combined_df[combined_df["User"] == user.name]["User"].to_numpy()[0]
+            user_cluster = combined_df[combined_df["User"] == user.name]["User"].to_numpy()[
+                0]
             user_recommendations = combined_df[combined_df["User"] == user.name].drop(columns=["User"]).to_dict(
                 orient="records")[0]
             recommendations.append({
