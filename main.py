@@ -1,15 +1,16 @@
-import requests
-from bs4 import BeautifulSoup
-import pandas as pd
-import nltk
-import re
-from nltk.corpus import stopwords
-from nltk.sentiment import SentimentIntensityAnalyzer
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
+from nltk.sentiment import SentimentIntensityAnalyzer
+from nltk.corpus import stopwords
+import re
+import nltk
+import pandas as pd
+from bs4 import BeautifulSoup
+import requests
+Optimized Python script:
 
 
 class Recipe:
@@ -92,20 +93,17 @@ class RecipeRecommendationSystem:
         nltk.download("vader_lexicon")
         stop_words = set(stopwords.words("english"))
 
+        reviews = [recipe.reviews for recipe in self.recipes]
+        cleaned_reviews = [self.clean_text(
+            review) for review_list in reviews for review in review_list]
+        without_stop_words = [self.remove_stop_words(
+            review, stop_words) for review in cleaned_reviews]
+        sentiment_scores = [self.sentiment_analysis(
+            review) for review in without_stop_words]
+        sentiment_scores = [score for score, _ in sentiment_scores]
+
         for user in self.users:
             user_profile = self.user_profiles[user.name]
-            reviews = []
-
-            for recipe in self.recipes:
-                reviews.extend(recipe.reviews)
-
-            cleaned_reviews = [self.clean_text(review) for review in reviews]
-            without_stop_words = [self.remove_stop_words(
-                review, stop_words) for review in cleaned_reviews]
-            sentiment_scores = [self.sentiment_analysis(
-                review) for review in without_stop_words]
-            sentiment_scores = [score for score, _ in sentiment_scores]
-
             user_profile["reviews"] = sentiment_scores
 
     def clean_text(self, text):
